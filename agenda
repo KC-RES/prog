@@ -5,7 +5,7 @@
 typedef struct {
     char nombre[30];
     char telefono[16];
-    bool activo;
+    bool estado;
 } Contacto;
 
 void create();
@@ -15,10 +15,11 @@ void mostrar();
 
 int main() {
     FILE *agenda;
-    agenda = fopen(".\\biblio.dat", "rb+");
-    if (agenda == NULL) {
-        agenda = fopen(".\\biblio.dat", "wb+");
-    }
+    agenda = fopen(".\\biblio.dat", "ab");
+    //if (agenda == NULL) {
+    //    agenda = fopen(".\\biblio.dat", "wb+");
+    //}
+    fclose(agenda);
 
     int opcion;
 
@@ -59,7 +60,7 @@ int main() {
                 break;
         }
     }
-    fclose(agenda);
+    //fclose(agenda);
 
     return 0;
 }
@@ -68,29 +69,25 @@ void create() {
     Contacto c;
     FILE *agenda;
     agenda = fopen(".\\biblio.dat", "ab+");
-    if (agenda == NULL) {
-        return;
-    }
 
     fflush(stdin);
     printf("Ingrese el Apellido y nombre: ");
     fgets(c.nombre, sizeof(c.nombre), stdin);
     printf("Ingrese el numero de telefono: ");
     fgets(c.telefono, sizeof(c.telefono), stdin);
-    c.activo = true;
+    c.estado = true;
     fwrite(&c, sizeof(Contacto), 1, agenda);
     fclose(agenda);
 }
 
 void editar() {
     Contacto c;
+    Contacto nuevo;
     char persona[30];
     FILE *agenda;
-    agenda = fopen(".\\agenda.dat", "rb+");
-    if (agenda == NULL) {
-        return;
-    }
+    agenda = fopen(".\\biblio.dat", "rb+");
 
+    nuevo.estado = true;
     fflush(stdin);
     printf("Ingrese el apellido y nombre a editar: ");
     fgets(persona, sizeof(persona), stdin);
@@ -98,11 +95,12 @@ void editar() {
     while (fread(&c, sizeof(Contacto), 1, agenda)) {
         if (strcmp(persona, c.nombre) == 0) {
             printf("Ingrese el nuevo Apellido y nombre: ");
-            fgets(c.nombre, sizeof(c.nombre), stdin);
+            fgets(nuevo.nombre, sizeof(nuevo.nombre), stdin);
+            printf("%s", nuevo.nombre);
             printf("Ingrese el nuevo numero de telefono: ");
-            fgets(c.telefono, sizeof(c.telefono), stdin);
+            fgets(nuevo.telefono, sizeof(nuevo.telefono), stdin);
             fseek(agenda, -sizeof(Contacto), SEEK_CUR);
-            fwrite(&c, sizeof(Contacto), 1, agenda);
+            fwrite(&nuevo, sizeof(Contacto), 1, agenda);
         }
     }
 
@@ -115,9 +113,6 @@ void borrar() {
     char borr[30];
     FILE *agenda;
     agenda = fopen(".\\biblio.dat", "rb+");
-    if (agenda == NULL) {
-        return;
-    }
 
     fflush(stdin);
     printf("Ingrese el apellido y nombre a borrar: ");
@@ -125,7 +120,10 @@ void borrar() {
 
     while (fread(&c, sizeof(Contacto), 1, agenda)) {
         if (strcmp(borr, c.nombre) == 0) {
-            c.activo = false;
+            printf("Contacto encontrado.");
+            printf("%s\n%s\n%d\n", c.nombre, c.telefono, c.estado);
+            c.estado = false;
+            printf("%s\n%s\n%d\n", c.nombre, c.telefono, c.estado);
             fseek(agenda, -sizeof(Contacto), SEEK_CUR);
             fwrite(&c, sizeof(Contacto), 1, agenda);
         }
@@ -138,13 +136,10 @@ void mostrar() {
     Contacto c;
     FILE *agenda;
     agenda = fopen(".\\biblio.dat", "rb");
-    if (agenda == NULL) {
-        return;
-    }
 
     printf("Lista de contactos:\n");
     while (fread(&c, sizeof(Contacto), 1, agenda)) {
-        if (c.activo == true) {
+        if (c.estado == true) {
             printf("Nombre: %s", c.nombre);
             printf("Numero de telefono: %s\n", c.telefono);
         }
