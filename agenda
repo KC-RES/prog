@@ -1,0 +1,154 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+typedef struct {
+    char nombre[30];
+    char telefono[16];
+    bool estado;
+} Contacto;
+
+void create();
+void editar();
+void borrar();
+void mostrar();
+
+int main() {
+    FILE *agenda;
+    agenda = fopen(".\\biblio.dat", "rb+");
+    if (agenda == NULL) {
+        agenda = fopen(".\\biblio.dat", "wb+");
+    }
+
+    int opcion;
+
+    while (opcion != 6) {
+        printf("_________________________\n");
+        printf("Bienvenido a la agenda, seleccione una opcion:\n");
+        printf("1-agregar un contacto.\n");
+        printf("2-editar contacto.\n");
+        printf("3-borrar contacto.\n");
+        printf("4-ordenar contactos.\n");
+        printf("5-mostrar contactos.\n");
+        printf("6-salir.\n");
+        printf("_________________________\n");
+        scanf("%d", &opcion);
+        fflush(stdin);
+
+        switch (opcion) {
+            case 1:
+                create();
+                break;
+            case 2:
+                editar();
+                break;
+            case 3:
+                borrar();
+                break;
+            case 4:
+                printf("Funcionalidad en progreso.\n");
+                break;
+            case 5:
+                mostrar();
+                break;
+            case 6:
+                printf("Finalizando programa.\n");
+                break;
+            default:
+                printf("Elija una opcion valida.\n");
+                break;
+        }
+    }
+    fclose(agenda);
+
+    return 0;
+}
+
+void create() {
+    Contacto c;
+    FILE *agenda;
+    agenda = fopen(".\\biblio.dat", "ab+");
+    if (agenda == NULL) {
+        return;
+    }
+
+    fflush(stdin);
+    printf("Ingrese el Apellido y nombre: ");
+    fgets(c.nombre, sizeof(c.nombre), stdin);
+    printf("Ingrese el numero de telefono: ");
+    fgets(c.telefono, sizeof(c.telefono), stdin);
+    c.estado = true;
+    fwrite(&c, sizeof(Contacto), 1, agenda);
+    fclose(agenda);
+}
+
+void editar() {
+    Contacto c;
+    char persona[30];
+    FILE *agenda;
+    agenda = fopen(".\\agenda.dat", "rb+");
+    if (agenda == NULL) {
+        return;
+    }
+
+    fflush(stdin);
+    printf("Ingrese el apellido y nombre a editar: ");
+    fgets(persona, sizeof(persona), stdin);
+
+    while (fread(&c, sizeof(Contacto), 1, agenda)) {
+        if (strcmp(persona, c.nombre) == 0) {
+            printf("Ingrese el nuevo Apellido y nombre: ");
+            fgets(c.nombre, sizeof(c.nombre), stdin);
+            printf("Ingrese el nuevo numero de telefono: ");
+            fgets(c.telefono, sizeof(c.telefono), stdin);
+            fseek(agenda, -sizeof(Contacto), SEEK_CUR);
+            fwrite(&c, sizeof(Contacto), 1, agenda);
+        }
+    }
+
+    fclose(agenda);
+}
+
+
+void borrar() {
+    Contacto c;
+    char borr[30];
+    FILE *agenda;
+    agenda = fopen(".\\biblio.dat", "rb+");
+    if (agenda == NULL) {
+        return;
+    }
+
+    fflush(stdin);
+    printf("Ingrese el apellido y nombre a borrar: ");
+    fgets(borr, sizeof(borr), stdin);
+
+    while (fread(&c, sizeof(Contacto), 1, agenda)) {
+        if (strcmp(borr, c.nombre) == 0) {
+            c.estado = false;
+            fseek(agenda, -sizeof(Contacto), SEEK_CUR);
+            fwrite(&c, sizeof(Contacto), 1, agenda);
+        }
+    }
+
+    fclose(agenda);
+}
+
+void mostrar() {
+    Contacto c;
+    FILE *agenda;
+    agenda = fopen(".\\biblio.dat", "rb");
+    if (agenda == NULL) {
+        return;
+    }
+
+    printf("Lista de contactos:\n");
+    while (fread(&c, sizeof(Contacto), 1, agenda)) {
+        if (c.estado == true) {
+            printf("Nombre: %s", c.nombre);
+            printf("Numero de telefono: %s\n", c.telefono);
+        }
+    }
+    
+    fclose(agenda); // Cerrar el archivo al finalizar la lectura.
+}
