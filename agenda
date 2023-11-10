@@ -5,7 +5,7 @@
 typedef struct {
     char nombre[30];
     char telefono[16];
-    bool estado;
+    bool activo;
 } Contacto;
 
 void create();
@@ -77,7 +77,7 @@ void create() {
     fgets(c.nombre, sizeof(c.nombre), stdin);
     printf("Ingrese el numero de telefono: ");
     fgets(c.telefono, sizeof(c.telefono), stdin);
-    c.estado = true;
+    c.activo = true;
     fwrite(&c, sizeof(Contacto), 1, agenda);
     fclose(agenda);
 }
@@ -125,7 +125,7 @@ void borrar() {
 
     while (fread(&c, sizeof(Contacto), 1, agenda)) {
         if (strcmp(borr, c.nombre) == 0) {
-            c.estado = false;
+            c.activo = false;
             fseek(agenda, -sizeof(Contacto), SEEK_CUR);
             fwrite(&c, sizeof(Contacto), 1, agenda);
         }
@@ -144,7 +144,7 @@ void mostrar() {
 
     printf("Lista de contactos:\n");
     while (fread(&c, sizeof(Contacto), 1, agenda)) {
-        if (c.estado == true) {
+        if (c.activo == true) {
             printf("Nombre: %s", c.nombre);
             printf("Numero de telefono: %s\n", c.telefono);
         }
